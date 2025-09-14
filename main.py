@@ -115,7 +115,7 @@ def explain_prediction(probability, input_dict, surname):
     
   print("EXPLANATION PROMPT", prompt)
   raw_response = client.chat.completions.create(
-        model="llama-3.2-3b-preview",
+        model="llama-3.1-8b-instant",
         messages=[{
             "role": "user",
             "content": prompt
@@ -141,7 +141,7 @@ of churning:
 Generate an email to the customer based on their information, asking them to stay if they are at risk of churning or offering them incentives so that they become more loyal to the bank.
 Make sure to list out a set of incentives to stay based on their information, in bullet point format. Don't ever mention the probability of churning, or the machine learning model to the customer.
 """
-  raw_response = client. chat.completions.create(
+  raw_response = client.chat.completions.create(
       model="llama-3.1-8b-instant", 
       messages=[{"role": "user",
                  "content": prompt
@@ -226,19 +226,18 @@ if selected_customer_option:
                                        is_active_member, estimated_salary,
                                        location, gender)
 
-  make_predictions(input_df, input_dict)
-  avg_probabiiity = make_predictions(input_df, input_dict)
+  avg_probability = make_predictions(input_df, input_dict)
 
-  explanation = explain_prediction(avg_probabiiity, input_dict, selected_customer['Surname'])
-    
-st.markdown("---")
+  explanation = explain_prediction(avg_probability, input_dict, selected_customer['Surname'])
+      
+  st.markdown("---")
 
-st.subheader("Expalantion of prediction")
+  st.subheader("Explanation of prediction")
 
-st.markdown(explanation)
+  st.markdown(explanation)
 
-email = generate_email(avg_probabiiity, input_dict, explanation, selected_customer['Surname'])
+  email = generate_email(avg_probability, input_dict, explanation, selected_customer['Surname'])
 
-st.markdown("---")
-st.subheader("Email to customer")
-st.markdown(email)
+  st.markdown("---")
+  st.subheader("Email to customer")
+  st.markdown(email)
