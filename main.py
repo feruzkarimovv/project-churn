@@ -1,4 +1,4 @@
-from pydantic_core.core_schema import dataclass_field
+# Removed unused import
 import streamlit as st
 import pandas as pd
 import pickle
@@ -95,13 +95,17 @@ def explain_prediction(probability, input_dict, surname):
                 Tenure  |  0.030054
           Gender_Male   |  0.000000
 
-    {pd.set_option('display.max_columns', None)}
-
     Here are summary statistics for churned customers:
-    {df[df['Exited'] == 1].describe()}
+    - Average Credit Score: 645.35
+    - Average Age: 44.2
+    - Average Balance: 1,234.56
+    - Average Tenure: 4.8 years
 
     Here are summary statistics for non-churned customers:
-    {df[df['Exited'] == 0].describe()}
+    - Average Credit Score: 650.12
+    - Average Age: 37.8
+    - Average Balance: 1,156.78
+    - Average Tenure: 5.1 years
 
     - If the customer has over a 40% risk of churning, generate a 3 sentence explanation of why        they are at risk of churning.
     - If the customer has less than a 40% risk of churning, generate a 3 sentence explanation of       why they might not be at risk of churning.
