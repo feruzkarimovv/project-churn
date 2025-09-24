@@ -6,9 +6,16 @@ import numpy as np
 import os
 from openai import OpenAI
 
-client = OpenAI(
-  base_url="https://api.groq.com/openai/v1",
-  api_key=os.environ.get("GROQ_API_KEY"))
+# Initialize OpenAI client only if API key is available
+groq_api_key = os.environ.get("GROQ_API_KEY")
+if groq_api_key:
+    client = OpenAI(
+        base_url="https://api.groq.com/openai/v1",
+        api_key=groq_api_key
+    )
+else:
+    client = None
+    st.warning("⚠️ GROQ_API_KEY not set. AI explanations and email generation will be disabled.")
 
 
 def load_model(filename):
@@ -69,8 +76,10 @@ def make_predictions(input_df, input_dict):
 
 
 def explain_prediction(probability, input_dict, surname):
+    if client is None:
+        return "AI explanation unavailable. Please set GROQ_API_KEY environment variable to enable AI-powered explanations."
     
-  prompt = f"""You are an expert data scientist at a bank, where you specialize in interpreting and explaining predictions of machine learning models.
+    prompt = f"""You are an expert data scientist at a bank, where you specialize in interpreting and explaining predictions of machine learning models.
 
   Your machine learning model has predicted that a customer named {surname} has a {round(probability * 100, 1)}% probability of churning, based on the information provided below.
 
@@ -117,19 +126,21 @@ def explain_prediction(probability, input_dict, surname):
     
     """
     
-  print("EXPLANATION PROMPT", prompt)
-  raw_response = client.chat.completions.create(
+    print("EXPLANATION PROMPT", prompt)
+    raw_response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
         messages=[{
             "role": "user",
             "content": prompt
         }],
     )
-  return raw_response.choices[0].message.content
+    return raw_response.choices[0].message.content
 
-def generate_email (probability, input_dict, explanation, surname):
-  
-  prompt = f"""You are a manager at HS Bank. You are responsible for
+def generate_email(probability, input_dict, explanation, surname):
+    if client is None:
+        return "AI email generation unavailable. Please set GROQ_API_KEY environment variable to enable AI-powered email generation."
+    
+    prompt = f"""You are a manager at HS Bank. You are responsible for
 ensuring customers. stay with the bank and are incentivized with. various offers:
 
 You noticed a customer named {surname} has a {round(probability *
@@ -145,16 +156,16 @@ of churning:
 Generate an email to the customer based on their information, asking them to stay if they are at risk of churning or offering them incentives so that they become more loyal to the bank.
 Make sure to list out a set of incentives to stay based on their information, in bullet point format. Don't ever mention the probability of churning, or the machine learning model to the customer.
 """
-  raw_response = client.chat.completions.create(
-      model="llama-3.1-8b-instant", 
-      messages=[{"role": "user",
-                 "content": prompt
-                }],
-  )
-  
-  print("\n\nEMAIL PROMPT", prompt)
+    raw_response = client.chat.completions.create(
+        model="llama-3.1-8b-instant", 
+        messages=[{"role": "user",
+                   "content": prompt
+                  }],
+    )
+    
+    print("\n\nEMAIL PROMPT", prompt)
 
-  return raw_response.choices[0].message.content
+    return raw_response.choices[0].message.content
 
 st.title("Customer Churn Prediction")
 
